@@ -13,7 +13,7 @@ parser.add_argument("--player2Name", help="Name of the Player2",default=None)
 parser.add_argument("--timed", help="Boolean for Timed Game",default=None)
 args = parser.parse_args()
 
-upper_limit = 25
+upper_limit = 100
 
 class Factory(object):
     def ConstructPlayer(self,type,name):
@@ -43,17 +43,16 @@ class PlayerData(object):
         return answer
 
 class ComputerData(PlayerData):
-    def makeDecision(self,score):
-        if score == 0:
+    def makeDecision(self,iteration_score):
+        #print 'Computer Score',self.score
+        #print 'Iteration Score',iteration_score
+
+        if 100 - self.score > 25 and iteration_score < 25:
             answer = 'r'
-        elif (100 - self.score > 25 and round_score < 25):
-            self.answer = 'r'
         else:
-            self.answer = 'h'
+            answer = 'h'
 
         return answer
-
-
 
 class Game(object):
     def __init__(self, type1, name1, type2, name2):  # Assign method name
@@ -99,7 +98,7 @@ class Game(object):
                 else:
                     print 'Congrats',player.name,'you rolled:',roll_value,'your temp score is',temp_player_score
                     print 'What would you like to do?'
-                    answer = player.makeDecision(player.score)
+                    answer = player.makeDecision(temp_player_score)
                     if answer == 'h':
                         player.score = temp_player_score
                         break
