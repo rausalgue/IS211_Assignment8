@@ -6,10 +6,23 @@ import random
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--name", help="Name of the Player",default=None)
+parser.add_argument("--player1", help="Player Type",default=None)
+parser.add_argument("--player1Name", help="Name of the Player1",default=None)
+parser.add_argument("--player2", help="Player Type",default=None)
+parser.add_argument("--player2Name", help="Name of the Player2",default=None)
+parser.add_argument("--timed", help="Boolean for Timed Game",default=None)
 args = parser.parse_args()
 
-upper_limit = 100
+upper_limit = 25
+
+class Factory(object):
+    def ConstructPlayer(self,type,name):
+        if type == 'human':
+            playerInstance = PlayerData(name)
+        else:
+            playerInstance = ComputerData(name)
+
+        return playerInstance
 
 class Dice(object):
     def __init__(self):
@@ -24,14 +37,35 @@ class PlayerData(object):
         self.name = name
         self.score = 0
 
+    def makeDecision(self,score):
+        answer = raw_input("Roll(r) or Hold(h): ")
+
+        return answer
+
+class ComputerData(PlayerData):
+    def makeDecision(self,score):
+        if score == 0:
+            answer = 'r'
+        elif (100 - self.score > 25 and round_score < 25):
+            self.answer = 'r'
+        else:
+            self.answer = 'h'
+
+        return answer
+
+
+
 class Game(object):
-    def __init__(self, value1, value2):  # Assign method name
-        self.player1 = value1
-        self.player2 = value2
+    def __init__(self, type1, name1, type2, name2):  # Assign method name
+        self.player1_type = type1
+        self.player1 = name1
+        self.player2_type = type2
+        self.player2 = name2
 
     def introducePlayers(self):
-        player1 = PlayerData(self.player1)
-        player2 = PlayerData(self.player2)
+        factory = Factory()
+        player1 = factory.ConstructPlayer(self.player1_type,self.player1)
+        player2 = factory.ConstructPlayer(self.player2_type,self.player2)
 
         return player1,player2
 
@@ -65,7 +99,7 @@ class Game(object):
                 else:
                     print 'Congrats',player.name,'you rolled:',roll_value,'your temp score is',temp_player_score
                     print 'What would you like to do?'
-                    answer = raw_input("Roll(r) or Hold(h): ")
+                    answer = player.makeDecision(player.score)
                     if answer == 'h':
                         player.score = temp_player_score
                         break
@@ -76,15 +110,28 @@ class Game(object):
 def main():
     # Call the Game Class to begin Game
     print 'Welcome to Our Game'
-    player_one = args.name if args.name else raw_input("Please enter name of first player: ")
+    player_one_type = args.player1 if args.player1 else raw_input("Player Type (human/computer): ")
 
-    if player_one:
-        player_two = args.name if args.name else raw_input("Please enter name of second player: ")
+    player_one_name = args.player1Name if args.player1Name else raw_input("Player One Name: ")
 
-    if player_one and player_two:
-        game = Game(player_one,player_two)
+    player_two_type = args.player2 if args.player2 else raw_input("Player Type (human/computer): ")
+
+    player_two_name = args.player2Name if args.player2Name else raw_input("Player Two Name: ")
+
+    timed = args.timed if args.timed else raw_input("Time the Game? (y/n)")
+
+    if player_one_type and player_one_name and player_two_type and player_two_name:
+        #print 'Game is set to begin.'
+        #print player_one_type,'named',player_one_name,'vs',player_two_type,'named',player_two_name
+        if timed == 'y':
+            print 'Timed Game'
+        else:
+            game = Game(player_one_type,player_one_name,player_two_type,player_two_name)
 
         player1,player2= game.introducePlayers()
+
+        print 'Welcome to the Game'
+        print player_one_type,'named',player1.name,'vs',player_two_type,'named',player2.name
 
         while player1.score < upper_limit and player2.score < upper_limit:
             game.rollDice(player1)
