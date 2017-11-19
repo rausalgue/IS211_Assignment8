@@ -4,6 +4,7 @@
 
 import random
 import argparse
+import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--player1", help="Player Type",default=None)
@@ -14,6 +15,7 @@ parser.add_argument("--timed", help="Boolean for Timed Game",default=None)
 args = parser.parse_args()
 
 upper_limit = 100
+time_limit = 60
 
 class Factory(object):
     def ConstructPlayer(self,type,name):
@@ -60,6 +62,7 @@ class Game(object):
         self.player1 = name1
         self.player2_type = type2
         self.player2 = name2
+        self.start_time = time.time()
 
     def introducePlayers(self):
         factory = Factory()
@@ -67,6 +70,11 @@ class Game(object):
         player2 = factory.ConstructPlayer(self.player2_type,self.player2)
 
         return player1,player2
+
+    def getTime(self):
+        #print 'Time not required'
+        time_value = 0
+        return time_value
 
     def rollDice(self,player):
         print '________',player.name,'________________ROLLING_______________________'
@@ -106,6 +114,13 @@ class Game(object):
                         continue
         return
 
+class TimedGameProxy(Game):
+    def getTime(self):
+        time_value = time.time()
+
+        return self.start_time, time_value
+
+
 def main():
     # Call the Game Class to begin Game
     print 'Welcome to Our Game'
@@ -123,7 +138,7 @@ def main():
         #print 'Game is set to begin.'
         #print player_one_type,'named',player_one_name,'vs',player_two_type,'named',player_two_name
         if timed == 'y':
-            print 'Timed Game'
+            game = TimedGameProxy(player_one_type,player_one_name,player_two_type,player_two_name)
         else:
             game = Game(player_one_type,player_one_name,player_two_type,player_two_name)
 
@@ -133,11 +148,26 @@ def main():
         print player_one_type,'named',player1.name,'vs',player_two_type,'named',player2.name
 
         while player1.score < upper_limit and player2.score < upper_limit:
+
+            if timed == 'y':
+                start_time,time_value = game.getTime()
+
+                if time_value-start_time > time_limit:
+                    print 'Time is Up. Here are the results'
+                    break
+
             game.rollDice(player1)
 
             if player1.score >= upper_limit:
                 print "Playes 1 Wins"
                 break
+
+            if timed == 'y':
+                start_time,time_value = game.getTime()
+
+                if time_value-start_time > time_limit:
+                    print 'Time is Up. Here are the results'
+                    break
 
             game.rollDice(player2)
 
